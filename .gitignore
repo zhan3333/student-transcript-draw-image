@@ -1,3 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 
 .idea
+.env
+send_email.json
+期末成绩单.xlsx
+out

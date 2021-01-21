@@ -10,20 +10,21 @@ import (
 	"image/color"
 	"image/draw"
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
 //绘制成绩单
 type DrawTranscript struct {
 	TemplateFileName string
-	OutFileName      string
+	OutFilePath      string
 	FontFilePath     string
 	Transcript       Transcript
 	m                *image.NRGBA
 }
 
 func NewDrawTranscript(templateFileName string, outFileName string, fontFilePath string, transcript Transcript) *DrawTranscript {
-	return &DrawTranscript{TemplateFileName: templateFileName, OutFileName: outFileName, FontFilePath: fontFilePath, Transcript: transcript}
+	return &DrawTranscript{TemplateFileName: templateFileName, OutFilePath: outFileName, FontFilePath: fontFilePath, Transcript: transcript}
 }
 
 //读取模板
@@ -40,7 +41,12 @@ func (d *DrawTranscript) ReadTemplate() error {
 
 //保存结果
 func (d *DrawTranscript) Save() error {
-	err := imaging.Save(d.m, d.OutFileName)
+	t := strings.SplitAfter(d.OutFilePath, "/")
+	err := os.MkdirAll(t[0], os.ModeDir|os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("创建文件夹 %s 失败: %+v", t[0], err)
+	}
+	err = imaging.Save(d.m, d.OutFilePath)
 	if err != nil {
 		return fmt.Errorf("保存图片失败: %+v\n", err)
 	}
@@ -127,7 +133,6 @@ func (d *DrawTranscript) writeParentComment(comment string) error {
 	}
 	var x = 1400
 	var y = 1920
-	fmt.Println(newComment)
 
 	return d.write(newComment, black, x, y)
 }

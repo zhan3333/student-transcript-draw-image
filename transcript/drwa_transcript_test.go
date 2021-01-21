@@ -11,9 +11,10 @@ func TestNewDrawTranscript(t *testing.T) {
 	d := transcript.NewDrawTranscript(
 		"../0001.jpg",
 		"../0001-new.jpg",
-		"../fonts/AR-PL-SungtiL-GB.ttf",
+		"../fonts/MSYH.TTC",
+		//"../fonts/AR-PL-SungtiL-GB.ttf",
 		transcript.Transcript{
-			Name:           "张三",
+			Name:           "陈晞文",
 			Class:          "二一班",
 			Grades:         []string{"甲", "甲", "甲", "甲", "甲", "甲", "甲"},
 			StudentComment: "君不见黄河之水天上来，奔流到海不复回。君不见高堂明镜悲白发，朝如青丝暮成雪。",
