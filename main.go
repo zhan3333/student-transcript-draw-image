@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gopkg.in/gomail.v2"
@@ -47,11 +48,16 @@ func init() {
 
 func main() {
 	r := gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowHeaders = append(config.AllowHeaders, "x-requested-with")
+	r.Use(cors.New(config))
 	r.GET("ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
-	r.POST("upload-transcript", UploadTranscript)
-	r.GET("download-transcript", DownloadTranscriptImg)
+	r.POST("upload", UploadTranscript)
+	r.GET("query", DownloadTranscriptImg)
+	r.Static("export", "files/export")
 	if err := r.Run(fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))); err != nil {
 		panic(err)
 	}
