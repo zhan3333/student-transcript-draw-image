@@ -15,7 +15,7 @@ func Read(path string) (*transcript.Transcripts, error) {
 	}
 	rows, err := f.GetRows(f.GetSheetList()[0])
 	for i, row := range rows {
-		if i < 2 {
+		if i < 2 || len(row) != 13 {
 			continue
 		}
 		for j, grade := range row[2:7] {

@@ -18,8 +18,13 @@ type Transcript struct {
 
 type Transcripts []Transcript
 
-//成绩是否有效
+// IsGradeValid 成绩是否有效
+// 可以接收 [0, 100] 的数字型成绩
+// 也可以接收 甲乙丙丁 的文本型成绩
 func IsGradeValid(grade string) bool {
+	if isTextGrade(grade) {
+		return true
+	}
 	i, err := strconv.ParseFloat(grade, 64)
 	if err != nil {
 		fmt.Printf("%s is not valid grade: %+v\n", grade, err)
@@ -36,6 +41,9 @@ func IsGradeValid(grade string) bool {
 
 //转换成绩为评级
 func ConvertMainGradeToRating(grade string) string {
+	if isTextGrade(grade) {
+		return grade
+	}
 	g, _ := strconv.ParseFloat(grade, 64)
 	if g >= 80 {
 		return "甲"
@@ -50,10 +58,27 @@ func ConvertMainGradeToRating(grade string) string {
 
 //次要科目
 func ConvertSecondaryGradeToRating(grade string) string {
+	if isTextGrade(grade) {
+		return grade
+	}
 	g, _ := strconv.ParseFloat(grade, 64)
 	if g >= 80 {
 		return "甲"
 	} else {
 		return "乙"
 	}
+}
+
+var textGrades = map[string]bool{
+	"甲": true,
+	"乙": true,
+	"丙": true,
+	"丁": true,
+}
+
+func isTextGrade(grade string) bool {
+	if textGrades[grade] {
+		return true
+	}
+	return false
 }

@@ -11,6 +11,7 @@ import (
 	"image/draw"
 	"io/ioutil"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -41,8 +42,10 @@ func (d *DrawTranscript) ReadTemplate() error {
 
 //保存结果
 func (d *DrawTranscript) Save() error {
-	t := strings.SplitAfter(d.OutFilePath, "/")
-	err := os.MkdirAll(t[0], os.ModeDir|os.ModePerm)
+	t := strings.Split(d.OutFilePath, "/")
+	dirPath := path.Join(t[0 : len(t)-1]...)
+	fmt.Println(t, dirPath)
+	err := os.MkdirAll(dirPath, os.ModeDir|os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("创建文件夹 %s 失败: %+v", t[0], err)
 	}
@@ -141,8 +144,8 @@ func (d *DrawTranscript) writeParentComment(comment string) error {
 func (d *DrawTranscript) writeGrades(grades []string) error {
 	for i, grade := range grades {
 		x := 960 + i*180
-		y := 2790
-		err := d.write(grade, golden, x, y)
+		y := 2775
+		err := d.write(grade, black, x, y)
 		if err != nil {
 			return fmt.Errorf("写第 %d 个成绩失败: %+v\n", i, err)
 		}
