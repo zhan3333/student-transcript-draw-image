@@ -52,12 +52,12 @@ func main() {
 	config.AllowAllOrigins = true
 	config.AllowHeaders = append(config.AllowHeaders, "x-requested-with")
 	r.Use(cors.New(config))
-	r.GET("ping", func(c *gin.Context) {
+	r.GET("api/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
-	r.POST("upload", UploadTranscript)
-	r.GET("query", DownloadTranscriptImg)
-	r.Static("export", "files/export")
+	r.POST("api/upload", UploadTranscript)
+	r.GET("api/query", DownloadTranscriptImg)
+	r.Static("api/export", "files/export")
 	if err := r.Run(fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))); err != nil {
 		panic(err)
 	}

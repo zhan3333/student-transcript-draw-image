@@ -1,8 +1,8 @@
 import React from 'react';
 import './App.css';
-import {Button, Col, Layout, message, Row, Upload} from "antd";
+import {Button, Col, Divider, Layout, message, Row, Space, Upload} from "antd";
 import Text from "antd/es/typography/Text";
-import {Content} from "antd/es/layout/layout";
+import {Content, Header} from "antd/es/layout/layout";
 import {UploadOutlined} from "@ant-design/icons";
 
 type APPState = {
@@ -14,8 +14,8 @@ type APPState = {
 
 console.log(process.env)
 
-const uploadURL = process.env.REACT_APP_SERVER_URL + "/upload"
-const queryURL = process.env.REACT_APP_SERVER_URL + "/query"
+const uploadURL = process.env.REACT_APP_SERVER_URL + "/api/upload"
+const queryURL = process.env.REACT_APP_SERVER_URL + "/api/query"
 
 export default class App extends React.Component<{}, APPState> {
     constructor(props: {}) {
@@ -48,6 +48,10 @@ export default class App extends React.Component<{}, APPState> {
             })
             message.error(`${info.file.name} file upload failed.`);
         }
+    }
+
+    enableUpload(): boolean {
+        return this.state.taskID === ""
     }
 
     query() {
@@ -84,22 +88,41 @@ export default class App extends React.Component<{}, APPState> {
     render() {
         return (
             <Layout>
+                <Header>
+                    <Text className={"header_text"}>华师附属保利南湖小学成绩单系统</Text>
+                </Header>
                 <Content>
                     <Row>
                         <Col>
                             <Upload name={"file"} action={uploadURL} onChange={this.upload} accept={".xls,.xlsx"}>
-                                <Button icon={<UploadOutlined/>}>Click to Upload</Button>
+                                <Button icon={<UploadOutlined/>} disabled={!this.enableUpload()}>上传成绩单表格</Button>
                             </Upload>
                         </Col>
                     </Row>
                     <Row>
                         <Col>
-                            <Text>{this.state.taskID}: {this.state.status}: {this.state.msg}: {this.state.process / 100} %</Text>
+                            <Space direction={"vertical"}>
+                                <Text>TaskID: {this.state.taskID}</Text>
+                                <Text>Status: {this.state.status}</Text>
+                                <Text>Msg:{this.state.msg}</Text>
+                                <Text>Process: {this.state.process / 100} %</Text>
+                            </Space>
                         </Col>
                     </Row>
                     <Row>
                         <Col>
                             <Button onClick={() => this.query()} disabled={!this.enableQuery()}>查询/下载</Button>
+                        </Col>
+                    </Row>
+                    <Divider/>
+                    <Row>
+                        <Col>
+                            <Space direction={"vertical"}>
+                                <Text>Tooltip</Text>
+                                <Text>1. 需要重新上传请刷新网页</Text>
+                                <Text>2. 刷新网页面前会丢失已上传的文件</Text>
+                                <Text>2. 点击上传后，需要手动的点击 查询/下载 按钮来更新状态</Text>
+                            </Space>
                         </Col>
                     </Row>
                 </Content>

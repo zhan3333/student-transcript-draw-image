@@ -116,7 +116,7 @@ func DownloadTranscriptImg(c *gin.Context) {
 			}
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"url": fmt.Sprintf("%s/export/%s", os.Getenv("ORIGIN"), filepath.Base(zipPath)),
+			"url": fmt.Sprintf("%s/api/export/%s", os.Getenv("ORIGIN"), filepath.Base(zipPath)),
 		})
 		return
 	}
