@@ -21,7 +21,11 @@ type Transcripts []Transcript
 // IsGradeValid 成绩是否有效
 // 可以接收 [0, 100] 的数字型成绩
 // 也可以接收 甲乙丙丁 的文本型成绩
+// 允许空成绩
 func IsGradeValid(grade string) bool {
+	if grade == "" {
+		return true
+	}
 	if isTextGrade(grade) {
 		return true
 	}
@@ -39,8 +43,11 @@ func IsGradeValid(grade string) bool {
 	return true
 }
 
-//转换成绩为评级
+// ConvertMainGradeToRating 转换成绩为评级
 func ConvertMainGradeToRating(grade string) string {
+	if grade == "" {
+		return ""
+	}
 	if isTextGrade(grade) {
 		return grade
 	}
@@ -56,8 +63,11 @@ func ConvertMainGradeToRating(grade string) string {
 	}
 }
 
-//次要科目
+// ConvertSecondaryGradeToRating 次要科目
 func ConvertSecondaryGradeToRating(grade string) string {
+	if grade == "" {
+		return ""
+	}
 	if isTextGrade(grade) {
 		return grade
 	}

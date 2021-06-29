@@ -11,19 +11,20 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"student-scope-send/controller"
 	"student-scope-send/email"
+	"student-scope-send/redis"
 	"student-scope-send/transcript"
+	"student-scope-send/util"
 )
 
-var templateFilePath = "./0002.jpg"
-var fontFilePath = "./fonts/MSYH.TTC"
 var envFile = ".env"
 var mail *email.Email
 var sendEmailsCache = "send_email.json"
 var sendEmails []string
 
 func init() {
-	if !isFileExists(envFile) {
+	if !util.IsFileExists(envFile) {
 		panic(fmt.Sprintf("%s 未配置\n", envFile))
 	}
 	err := godotenv.Load(envFile)
@@ -31,7 +32,7 @@ func init() {
 		panic(fmt.Sprintf("%s 读取失败: %+v\n", envFile, err))
 	}
 
-	if err = InitRedis(); err != nil {
+	if err = redis.InitRedis(); err != nil {
 		panic(err)
 	}
 
@@ -55,23 +56,12 @@ func main() {
 	r.GET("api/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
-	r.POST("api/upload", UploadTranscript)
-	r.GET("api/query", DownloadTranscriptImg)
+	r.POST("api/upload", controller.UploadTranscript)
+	r.GET("api/query", controller.DownloadTranscriptImg)
 	r.Static("api/export", "files/export")
 	if err := r.Run(fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))); err != nil {
 		panic(err)
 	}
-}
-
-func isFileExists(path string) bool {
-	_, err := os.Stat(path) //os.Stat获取文件信息
-	if err != nil {
-		if os.IsExist(err) {
-			return true
-		}
-		return false
-	}
-	return true
 }
 
 func sendEmail(t transcript.Transcript, transcriptFile string) error {

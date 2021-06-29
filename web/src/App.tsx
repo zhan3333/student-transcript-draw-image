@@ -9,7 +9,8 @@ type APPState = {
     taskID: string,
     status: string,
     process: number,
-    msg: string
+    msg: string,
+    loading: boolean,
 }
 
 console.log(process.env)
@@ -24,7 +25,8 @@ export default class App extends React.Component<{}, APPState> {
             taskID: "",
             status: "",
             process: 0,
-            msg: ""
+            msg: "",
+            loading: false,
         }
         this.upload = this.upload.bind(this);
     }

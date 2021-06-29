@@ -1,4 +1,4 @@
-package main
+package controller
 
 import (
 	"archive/zip"
@@ -16,9 +16,14 @@ import (
 	"path/filepath"
 	"strings"
 	"student-scope-send/read"
+	redis2 "student-scope-send/redis"
 	"student-scope-send/transcript"
+	"student-scope-send/util"
 	"time"
 )
+
+var templateFilePath = "./0002.jpg"
+var fontFilePath = "./fonts/MSYH.TTC"
 
 func UploadTranscript(c *gin.Context) {
 	var (
@@ -108,7 +113,7 @@ func DownloadTranscriptImg(c *gin.Context) {
 			return
 		}
 		zipPath := path.Join("files", "export", fmt.Sprintf("%s.zip", task.ID))
-		if !isFileExists(zipPath) {
+		if !util.IsFileExists(zipPath) {
 			err = Zip(path.Join("files/out", task.ID), zipPath)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
@@ -139,11 +144,11 @@ type Task struct {
 
 func (t *Task) Cache() error {
 	b, _ := json.Marshal(t)
-	return RDB.Set(context.Background(), t.Key(), string(b), 0).Err()
+	return redis2.RDB.Set(context.Background(), t.Key(), string(b), 0).Err()
 }
 
 func (t *Task) Resume() error {
-	s, err := RDB.Get(context.Background(), t.Key()).Result()
+	s, err := redis2.RDB.Get(context.Background(), t.Key()).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return fmt.Errorf("key %s 不存在", t.Key())
@@ -210,7 +215,7 @@ func operator(taskID string) {
 			fontFilePath,
 			t,
 		)
-		if isFileExists(outFile) {
+		if util.IsFileExists(outFile) {
 			fmt.Printf("成绩单 %s 已经存在, 如需重新生成, 请先删除对应成绩单文件\n", outFile)
 		} else {
 			// 生成成绩单
