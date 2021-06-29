@@ -15,6 +15,7 @@ type APPState = {
 
 console.log(process.env)
 
+const version = "1.0.0"
 const uploadURL = process.env.REACT_APP_SERVER_URL + "/api/upload"
 const queryURL = process.env.REACT_APP_SERVER_URL + "/api/query"
 
@@ -92,7 +93,7 @@ export default class App extends React.Component<{}, APPState> {
         return (
             <Layout>
                 <Header>
-                    <Text className={"header_text"}>华师附属保利南湖小学成绩单系统</Text>
+                    <Text className={"header_text"}>华师附属保利南湖小学成绩单系统 {version}</Text>
                 </Header>
                 <Content>
                     <Row>
