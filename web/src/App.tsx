@@ -64,6 +64,7 @@ export default class App extends React.Component<{}, APPState> {
         fetch(queryURL + "?task_id=" + this.state.taskID)
             .then(response => {
                 response.json().then((body) => {
+                    console.log(response, body)
                     if (response.status === 200) {
                         window.open(body["url"])
                         return
@@ -107,7 +108,7 @@ export default class App extends React.Component<{}, APPState> {
                                 <Text>TaskID: {this.state.taskID}</Text>
                                 <Text>Status: {this.state.status}</Text>
                                 <Text>Msg:{this.state.msg}</Text>
-                                <Text>Process: {this.state.process / 100} %</Text>
+                                <Text>Process: {this.state.process} %</Text>
                             </Space>
                         </Col>
                     </Row>

@@ -25,7 +25,7 @@ import (
 var templateFilePath = "./0002.jpg"
 var fontFilePath = "./fonts/MSYH.TTC"
 
-func UploadTranscript(c *gin.Context) {
+func Upload(c *gin.Context) {
 	var (
 		taskID = GenerateTaskID()
 	)
@@ -70,7 +70,7 @@ func UploadTranscript(c *gin.Context) {
 	go operator(taskID)
 }
 
-func DownloadTranscriptImg(c *gin.Context) {
+func Query(c *gin.Context) {
 	task := Task{
 		ID: c.Query("task_id"),
 	}
@@ -129,6 +129,7 @@ func DownloadTranscriptImg(c *gin.Context) {
 	c.JSON(status, gin.H{
 		"msg":     msg,
 		"process": process,
+		"status":  task.Status,
 	})
 }
 

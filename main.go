@@ -56,8 +56,8 @@ func main() {
 	r.GET("api/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
-	r.POST("api/upload", controller.UploadTranscript)
-	r.GET("api/query", controller.DownloadTranscriptImg)
+	r.POST("api/upload", controller.Upload)
+	r.GET("api/query", controller.Query)
 	r.Static("api/export", "files/export")
 	if err := r.Run(fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))); err != nil {
 		panic(err)
