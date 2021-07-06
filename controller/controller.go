@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/olekukonko/tablewriter"
 	"io"
 	"math/rand"
 	"net/http"
@@ -15,8 +16,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"student-scope-send/app"
 	"student-scope-send/read"
-	redis2 "student-scope-send/redis"
 	"student-scope-send/transcript"
 	"student-scope-send/util"
 	"time"
@@ -81,10 +82,29 @@ func Query(c *gin.Context) {
 		return
 	}
 	var (
-		status  int
-		msg     string
-		process = task.Process
+		status     int
+		msg        string
+		process    = task.Process
+		url        string
+		table      [][]string
+		mailState  string
+		mailErrMsg string
 	)
+
+	table = append(table, []string{"姓名", "邮箱", "成绩单", "状态", "错误"})
+	for _, mail := range task.Mails {
+		mailErrMsg = ""
+		mailState = "待发送"
+		if mail.Error != nil {
+			mailErrMsg = mail.Error.Error()
+			mailState = "失败"
+		}
+		table = append(table, []string{mail.Name, mail.Email, mail.FilePath, mailState, mailErrMsg})
+	}
+	for _, mail := range task.SentMails {
+		table = append(table, []string{mail.Name, mail.Email, mail.FilePath, "成功", ""})
+	}
+
 	switch task.Status {
 	case "pending":
 		status = http.StatusAccepted
@@ -120,36 +140,64 @@ func Query(c *gin.Context) {
 				return
 			}
 		}
-		c.JSON(http.StatusOK, gin.H{
-			"url": fmt.Sprintf("%s/api/export/%s", os.Getenv("ORIGIN"), filepath.Base(zipPath)),
-		})
-		return
+		url = fmt.Sprintf("%s/api/export/%s", os.Getenv("ORIGIN"), filepath.Base(zipPath))
 	}
 
 	c.JSON(status, gin.H{
-		"msg":     msg,
-		"process": process,
-		"status":  task.Status,
+		"url":        url,
+		"msg":        msg,
+		"process":    process,
+		"status":     task.Status,
+		"mails":      len(task.Mails),
+		"sent_mails": len(task.SentMails),
+		"table":      table,
 	})
 }
 
+func Send(c *gin.Context) {
+	taskID := c.Query("task_id")
+	if taskID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": fmt.Sprintf("task_id 必须传入"),
+		})
+		return
+	}
+	if err := send(taskID); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": fmt.Sprintf("发送邮件发生错误 %+v", err),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "ok"})
+}
+
 type Task struct {
-	ID       string     `json:"id"`
-	FilePath string     `json:"file_path"`
-	Status   string     `json:"status"`
-	Process  int        `json:"process"`
-	StartAt  *time.Time `json:"start_at"`
-	EndAt    *time.Time `json:"end_at"`
-	Err      string     `json:"err"`
+	ID        string     `json:"id"`
+	FilePath  string     `json:"file_path"`
+	Status    string     `json:"status"`
+	Process   int        `json:"process"`
+	StartAt   *time.Time `json:"start_at"`
+	EndAt     *time.Time `json:"end_at"`
+	Err       string     `json:"err"`
+	Mails     []TaskMail `json:"mails"`
+	SentMails []TaskMail `json:"sent_mails"`
+}
+
+type TaskMail struct {
+	Name      string `json:"name"`
+	FilePath  string `json:"file_path"`
+	Email     string `json:"email"`
+	FailCount int    `json:"fail_count"`
+	Error     error  `json:"error"`
 }
 
 func (t *Task) Cache() error {
 	b, _ := json.Marshal(t)
-	return redis2.RDB.Set(context.Background(), t.Key(), string(b), 0).Err()
+	return app.GetRedis().Set(context.Background(), t.Key(), string(b), 24*30*time.Hour).Err()
 }
 
 func (t *Task) Resume() error {
-	s, err := redis2.RDB.Get(context.Background(), t.Key()).Result()
+	s, err := app.GetRedis().Get(context.Background(), t.Key()).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return fmt.Errorf("key %s 不存在", t.Key())
@@ -186,8 +234,7 @@ func GenerateTaskID() string {
 
 func operator(taskID string) {
 	var (
-		outDir               = path.Join("files", "out", taskID)
-		failedSendEmailNames []string
+		outDir = path.Join("files", "out", taskID)
 	)
 	task := Task{ID: taskID}
 	if err := task.Resume(); err != nil {
@@ -236,22 +283,7 @@ func operator(taskID string) {
 				continue
 			}
 		}
-
-		//fmt.Println("开始发送邮件")
-		//if isSendEmail(t.Name) {
-		//	fmt.Println("缓存发现已经发送过邮件, 跳过发送")
-		//} else {
-		//	time.Sleep(5 * time.Second)
-		//	err = sendEmail(t, outFile)
-		//	if err != nil {
-		//		fmt.Printf("邮件发送失败: %+v\n", err)
-		//		failedSendEmailNames = append(failedSendEmailNames, t.Name)
-		//	} else {
-		//		setSendEmail(t.Name)
-		//		fmt.Println("邮件发送完毕")
-		//	}
-		//}
-
+		task.Mails = append(task.Mails, TaskMail{Name: d.Transcript.Name, FilePath: d.OutFilePath, Email: d.Transcript.Email})
 		task.Process = 100 * (i + 1) / len(*ts)
 		_ = task.Cache()
 		fmt.Printf("第 %d 条数据: %s 处理完成\n", i+1, t.Name)
@@ -262,8 +294,66 @@ func operator(taskID string) {
 	now = time.Now()
 	task.EndAt = &now
 	_ = task.Cache()
-	fmt.Printf("发送邮件失败的学生名单: %v\n", failedSendEmailNames)
 	fmt.Println("程序执行完毕")
+}
+
+func send(taskID string) error {
+	task := Task{ID: taskID}
+	if err := task.Resume(); err != nil {
+		err = fmt.Errorf("读取缓存失败: %w\n", err)
+		return err
+	}
+	if len(task.Mails) == 0 {
+		return fmt.Errorf("无待发送的邮件")
+	}
+	var (
+		sent []TaskMail
+		fail []TaskMail
+	)
+	fmt.Println("开始发送邮件")
+	for _, mail := range task.Mails {
+		err := func() error {
+			if mail.Email == "" {
+				return fmt.Errorf("%s 未配置邮箱", mail.Name)
+			}
+			if !util.IsFileExists(mail.FilePath) {
+				return fmt.Errorf("%s 文件不存在", mail.FilePath)
+			}
+
+			err := SendEmail(mail.Email, mail.Name, mail.FilePath)
+			if err != nil {
+				return fmt.Errorf("邮件发送失败: %w", err)
+			}
+			return nil
+		}()
+		if err != nil {
+			fmt.Printf("%s %s 发送失败: %+v\n", mail.Name, mail.Email, err)
+			mail.FailCount++
+			mail.Error = err
+			fail = append(fail, mail)
+		} else {
+			fmt.Printf("%s %s 发送成功\n", mail.Name, mail.Email)
+			sent = append(sent, mail)
+		}
+		time.Sleep(3 * time.Second)
+	}
+	task.Mails = fail
+	task.SentMails = sent
+	fmt.Printf("发送邮件结束, 成功 %d / 失败 %d\n", len(task.SentMails), len(task.Mails))
+	if len(task.Mails) > 0 {
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"姓名", "邮箱", "失败次数", "最后一次失败原因"})
+		for _, mail := range task.Mails {
+			table.Append([]string{mail.Name, mail.Email, string(rune(mail.FailCount)), mail.Error.Error()})
+		}
+		table.Render()
+	}
+	if err := task.Cache(); err != nil {
+		b, _ := json.Marshal(task)
+		fmt.Println("cache failed", string(b))
+		return err
+	}
+	return nil
 }
 
 func Zip(src_dir string, zip_file_name string) error {

@@ -20,7 +20,7 @@ func Read(path string) (*transcript.Transcripts, error) {
 		}
 		for j, grade := range row[2:7] {
 			if !transcript.IsGradeValid(grade) {
-				return nil, fmt.Errorf("第 %d 行 第 %d 个成绩填写错误", i-1, j+1)
+				return nil, fmt.Errorf("第 %d 行 第 %d 个成绩填写错误", i+1, j+1)
 			}
 		}
 		grades := []string{

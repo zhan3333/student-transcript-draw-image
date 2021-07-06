@@ -5,15 +5,8 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-var EMAIL *Email
-
 type Email struct {
 	D *gomail.Dialer
-}
-
-func InitEmail(host string, port int, username string, password string) error {
-	EMAIL = NewEmail(host, port, username, password)
-	return nil
 }
 
 func NewEmail(host string, port int, username string, password string) *Email {
