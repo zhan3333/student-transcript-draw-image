@@ -95,8 +95,8 @@ func Query(c *gin.Context) {
 	for _, mail := range task.Mails {
 		mailErrMsg = ""
 		mailState = "待发送"
-		if mail.Error != nil {
-			mailErrMsg = mail.Error.Error()
+		if mail.Error != "" {
+			mailErrMsg = mail.Error
 			mailState = "失败"
 		}
 		table = append(table, []string{mail.Name, mail.Email, mail.FilePath, mailState, mailErrMsg})
@@ -188,7 +188,7 @@ type TaskMail struct {
 	FilePath  string `json:"file_path"`
 	Email     string `json:"email"`
 	FailCount int    `json:"fail_count"`
-	Error     error  `json:"error"`
+	Error     string `json:"-"`
 }
 
 func (t *Task) Cache() error {
@@ -329,7 +329,7 @@ func send(taskID string) error {
 		if err != nil {
 			fmt.Printf("%s %s 发送失败: %+v\n", mail.Name, mail.Email, err)
 			mail.FailCount++
-			mail.Error = err
+			mail.Error = err.Error()
 			fail = append(fail, mail)
 		} else {
 			fmt.Printf("%s %s 发送成功\n", mail.Name, mail.Email)
@@ -344,7 +344,7 @@ func send(taskID string) error {
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"姓名", "邮箱", "失败次数", "最后一次失败原因"})
 		for _, mail := range task.Mails {
-			table.Append([]string{mail.Name, mail.Email, string(rune(mail.FailCount)), mail.Error.Error()})
+			table.Append([]string{mail.Name, mail.Email, string(rune(mail.FailCount)), mail.Error})
 		}
 		table.Render()
 	}
