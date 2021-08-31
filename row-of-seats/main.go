@@ -32,6 +32,9 @@ func main() {
 	}
 	fmt.Printf("读取到了 %d 位同学\n", len(students))
 	seatArrangement()
+	if err := printSeatsToFile("row-of-seats/座位表.xlsx"); err != nil {
+		fmt.Printf("输出座位表失败: %w\n", err)
+	}
 }
 
 func initStudent(filename string) error {
@@ -64,13 +67,13 @@ func initStudent(filename string) error {
 			top10 = true
 			level = "top"
 		}
-		if i > 10 && i <= 23 {
+		if i > 10 && i <= 20 {
 			level = "top"
 		}
-		if i > 23 && i <= 36 {
+		if i > 20 && i <= 40 {
 			level = "mid"
 		}
-		if i > 36 {
+		if i > 40 {
 			level = "bottom"
 		}
 		students = append(students, Student{
@@ -175,6 +178,45 @@ func printSeats() {
 		table.Append(v)
 	}
 	table.Render() // Send output
+}
+
+// 输出到 excel 中
+func printSeatsToFile(filename string) error {
+	var sheet = "Sheet1"
+	var err error
+	f := excelize.NewFile()
+	// 创建一个工作表
+	index := f.NewSheet(sheet)
+	// 设置单元格的值
+	err = f.SetSheetRow(sheet, "A1", &[]string{
+		"一", "二", "三", "四", "五", "六", "七", "八",
+	})
+	if err != nil {
+		return err
+	}
+
+	for i := range room {
+		var row []string
+		for j := range room[i] {
+			seat := room[i][j]
+			if seat.Student != nil {
+				row = append(row, seat.Student.Name)
+			} else {
+				row = append(row, "空")
+			}
+		}
+		if err = f.SetSheetRow(sheet, fmt.Sprintf("A%d", i+2), &row); err != nil {
+			return err
+		}
+	}
+
+	// 设置工作簿的默认工作表
+	f.SetActiveSheet(index)
+	// 根据指定路径保存文件
+	if err := f.SaveAs(filename); err != nil {
+		return err
+	}
+	return nil
 }
 
 // 按照规则给学生安排座位
