@@ -2,6 +2,7 @@ package read
 
 import (
 	"fmt"
+
 	"student-scope-send/transcript"
 )
 import "github.com/360EntSecGroup-Skylar/excelize/v2"
@@ -16,6 +17,10 @@ func Read(path string) (*transcript.Transcripts, error) {
 	rows, err := f.GetRows(f.GetSheetList()[0])
 	for i, row := range rows {
 		if i < 2 || len(row) < 12 {
+			continue
+		}
+		name := row[1]
+		if name == "" {
 			continue
 		}
 		for j, grade := range row[2:7] {
@@ -37,7 +42,7 @@ func Read(path string) (*transcript.Transcripts, error) {
 			email = row[12]
 		}
 		ts = append(ts, transcript.Transcript{
-			Name:           row[1],
+			Name:           name,
 			Class:          row[0],
 			Grades:         grades,
 			StudentComment: row[10],

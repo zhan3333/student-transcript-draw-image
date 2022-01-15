@@ -16,23 +16,21 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
+
 	"student-scope-send/app"
 	"student-scope-send/read"
 	"student-scope-send/transcript"
 	"student-scope-send/util"
-	"time"
 )
 
-var templateFilePath = "./0002.jpg"
+var templateFilePath = "./0003.jpg"
 var fontFilePath = "./fonts/MSYH.TTC"
 
 func Upload(c *gin.Context) {
-	var (
-		taskID = GenerateTaskID()
-	)
 	// 单文件
 	file, _ := c.FormFile("file")
-
+	taskID := GenerateTaskID(strings.TrimSuffix(file.Filename, filepath.Ext(file.Filename)))
 	// 上传文件至指定目录
 	savePath := filepath.Join("files/upload", randomFileName(file.Filename, taskID))
 	err := os.MkdirAll(strings.ReplaceAll(savePath, filepath.Base(savePath), ""), os.ModeDir|os.ModePerm)
@@ -223,10 +221,13 @@ func randomFileName(filename string, taskID string) string {
 
 const randStrs = "abcdefghijklmnopqrstuvwxyz0123456789"
 
-func GenerateTaskID() string {
+func GenerateTaskID(prefix string) string {
 	rand.Seed(time.Now().Unix())
 	ret := ""
-	for i := 0; i <= 32; i++ {
+	if prefix != "" {
+		ret += prefix + "_"
+	}
+	for i := 0; i <= 8; i++ {
 		ret += string(randStrs[rand.Intn(len(randStrs))])
 	}
 	return ret

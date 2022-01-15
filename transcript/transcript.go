@@ -84,6 +84,7 @@ var textGrades = map[string]bool{
 	"乙": true,
 	"丙": true,
 	"丁": true,
+	"缺": true,
 }
 
 func isTextGrade(grade string) bool {
