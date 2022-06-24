@@ -336,7 +336,7 @@ func send(taskID string) error {
 			fmt.Printf("%s %s 发送成功\n", mail.Name, mail.Email)
 			sent = append(sent, mail)
 		}
-		time.Sleep(3 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 	task.Mails = fail
 	task.SentMails = sent
@@ -361,18 +361,18 @@ func Zip(src_dir string, zip_file_name string) error {
 	fmt.Println(src_dir, zip_file_name)
 
 	// 预防：旧文件无法覆盖
-	os.RemoveAll(zip_file_name)
+	_ = os.RemoveAll(zip_file_name)
 
 	// 创建：zip文件
 	zipfile, err := os.Create(zip_file_name)
 	if err != nil {
 		return err
 	}
-	defer zipfile.Close()
+	defer func() { _ = zipfile.Close() }()
 
 	// 打开：zip文件
 	archive := zip.NewWriter(zipfile)
-	defer archive.Close()
+	defer func() { _ = archive.Close() }()
 
 	// 遍历路径信息
 	return filepath.Walk(src_dir, func(path string, info os.FileInfo, _ error) error {
@@ -398,8 +398,8 @@ func Zip(src_dir string, zip_file_name string) error {
 		writer, _ := archive.CreateHeader(header)
 		if !info.IsDir() {
 			file, _ := os.Open(path)
-			defer file.Close()
-			io.Copy(writer, file)
+			defer func() { _ = file.Close() }()
+			_, _ = io.Copy(writer, file)
 		}
 		return nil
 	})

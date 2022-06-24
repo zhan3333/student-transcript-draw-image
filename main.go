@@ -2,15 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	redis2 "github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
-	"net/http"
 	"os"
 	"strconv"
+
 	"student-scope-send/app"
-	"student-scope-send/controller"
+	"student-scope-send/cmd"
 	"student-scope-send/email"
 	"student-scope-send/redis"
 	"student-scope-send/util"
@@ -35,6 +33,7 @@ func init() {
 	app.SetRedis(rdb)
 
 	port, _ := strconv.Atoi(os.Getenv("EMAIL_PORT"))
+	fmt.Println(os.Getenv("EMAIL_HOST"), os.Getenv("EMAIL_PORT"), os.Getenv("EMAIL_USER"), os.Getenv("EMAIL_PASSWORD"))
 	app.SetEmail(email.NewEmail(
 		os.Getenv("EMAIL_HOST"),
 		port,
@@ -44,19 +43,7 @@ func init() {
 }
 
 func main() {
-	r := gin.Default()
-	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
-	config.AllowHeaders = append(config.AllowHeaders, "x-requested-with")
-	r.Use(cors.New(config))
-	r.GET("api/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "pong")
-	})
-	r.POST("api/upload", controller.Upload)
-	r.GET("api/query", controller.Query)
-	r.GET("api/send", controller.Send)
-	r.Static("api/export", "files/export")
-	if err := r.Run(fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))); err != nil {
-		panic(err)
+	if err := cmd.Execute(); err != nil {
+		fmt.Println(err)
 	}
 }

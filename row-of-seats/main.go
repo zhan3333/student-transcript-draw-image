@@ -50,16 +50,19 @@ func initStudent(filename string) error {
 		if i == 0 {
 			continue
 		}
-		if row[0] == "" || row[1] == "" || row[2] == "" {
+		if row[0] == "" || row[2] == "" {
 			return fmt.Errorf("读取第 %d 行失败: 有数据未填写", i+1)
 		}
 		scope, err := strconv.ParseFloat(row[2], 64)
 		if err != nil {
 			return fmt.Errorf("读取第 %d 行总分失败: %w", i+1, err)
 		}
-		sex := 1
+		sex := None
 		if row[1] == "女" {
-			sex = 2
+			sex = Female
+		}
+		if row[1] == "男" {
+			sex = Male
 		}
 		top10 := false
 		level := ""
@@ -79,7 +82,7 @@ func initStudent(filename string) error {
 		students = append(students, Student{
 			Name:  row[0],
 			Scope: scope,
-			Sex:   Sex(sex),
+			Sex:   sex,
 			Top10: top10,
 			Level: level,
 		})
@@ -155,13 +158,9 @@ func printSeats() {
 		for j := range room[i] {
 			seat := room[i][j]
 			if seat.Student != nil {
-				sex := "男"
-				if seat.Student.Sex == Female {
-					sex = "女"
-				}
 				row = append(row, fmt.Sprintf("%s(%s%s)",
 					seat.Student.Name,
-					sex,
+					seat.Student.Sex.String(),
 					seat.Student.Level,
 				))
 			} else {
@@ -338,20 +337,19 @@ func setToEmpty(student Student) bool {
 			if !seat.Enable || seat.Student != nil {
 				continue
 			}
+			var side Seat
+			// 偶数右边为同桌，奇数左边为同桌
 			if j&1 == 0 {
-				side := room[i][j+1]
-				if side.Student == nil || side.Student.Sex != student.Sex {
-					// 如果邻桌为空或者性别不一样，则可以坐
-					room[i][j].Student = &student
-					return true
-				}
+				side = room[i][j+1]
 			} else {
-				side := room[i][j-1]
-				if side.Student == nil || side.Student.Sex != student.Sex {
-					// 如果邻桌为空或者性别不一样，则可以坐
-					room[i][j].Student = &student
-					return true
-				}
+				side = room[i][j-1]
+			}
+			if side.Student == nil ||
+				side.Student.Sex == None ||
+				(side.Student.Sex != student.Sex) {
+				// 邻桌为空或者无性别或者性别不一样就可以安排坐
+				room[i][j].Student = &student
+				return true
 			}
 		}
 	}
@@ -360,7 +358,19 @@ func setToEmpty(student Student) bool {
 
 type Sex int
 
+func (s Sex) String() string {
+	switch s {
+	case Male:
+		return "男"
+	case Female:
+		return "女"
+	default:
+		return "无"
+	}
+}
+
 var (
+	None   Sex = 0
 	Male   Sex = 1
 	Female Sex = 2
 )

@@ -12,3 +12,10 @@
 - [] 提供在线预览界面
 - [] 提供全部发送邮件界面
 
+## 命令
+
+转换表格中数字成绩为甲乙丙丁评级
+
+```shell
+go run main.go excel convert-transcript -f="/Users/zhan/Downloads/期末成绩单-demo(1).xlsx"
+```
