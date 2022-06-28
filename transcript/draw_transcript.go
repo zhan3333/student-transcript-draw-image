@@ -99,52 +99,47 @@ func (d *DrawTranscript) Draw() error {
 
 //写教师评语, 26个字符一行
 func (d *DrawTranscript) writeTeacherComment(comment string) error {
-	newComment := ""
-	for i, c := range []rune(comment) {
-		if (i+1)%26 == 0 {
-			newComment += "\n"
+	var x = 780
+	var y = 1925
+	return d.write(MakeNewLine(comment, 26), black, x, y)
+}
+
+// MakeNewLine 根据长度加入换行
+func MakeNewLine(s string, length int) string {
+	var arr []string
+	for _, l := range strings.Split(s, "\n") {
+		s2 := ""
+		for j, c := range []rune(l) {
+			if (j+1)%length == 0 {
+				s2 += "\n"
+			}
+			s2 += string(c)
 		}
-		newComment += string(c)
+		arr = append(arr, s2)
 	}
-	var x = 550
-	var y = 1400
-	return d.write(newComment, black, x, y)
+
+	return strings.Join(arr, "\n")
 }
 
 // 童言妙语
 func (d *DrawTranscript) writeStudentComment(comment string) error {
-	newComment := ""
-	for i, c := range []rune(comment) {
-		if (i+1)%9 == 0 {
-			newComment += "\n"
-		}
-		newComment += string(c)
-	}
-	var x = 600
-	var y = 2000
-	return d.write(newComment, black, x, y)
+	var x = 890
+	var y = 2655
+	return d.write(MakeNewLine(comment, 9), black, x, y)
 }
 
 // 家长心语
 func (d *DrawTranscript) writeParentComment(comment string) error {
-	newComment := ""
-	for i, c := range []rune(comment) {
-		if (i+1)%9 == 0 {
-			newComment += "\n"
-		}
-		newComment += string(c)
-	}
-	var x = 1400
-	var y = 1920
-
-	return d.write(newComment, black, x, y)
+	var x = 2000
+	var y = 2610
+	return d.write(MakeNewLine(comment, 9), black, x, y)
 }
 
 // 成绩
 func (d *DrawTranscript) writeGrades(grades []string) error {
 	for i, grade := range grades {
-		x := 960 + i*180
-		y := 2775
+		x := 1255 + i*238 // 初始坐标 + 偏移量
+		y := 3660
 		err := d.write(grade, black, x, y)
 		if err != nil {
 			return fmt.Errorf("写第 %d 个成绩失败: %+v\n", i, err)
@@ -155,25 +150,21 @@ func (d *DrawTranscript) writeGrades(grades []string) error {
 
 // 学生姓名
 func (d *DrawTranscript) writeName(name string) error {
-	var x = 950
-	var y = 600
-	return d.write(name, golden, x, y)
+	var x = 1400
+	var y = 900
+	return d.write(name, black, x, y)
 }
 
 // 班级
 func (d *DrawTranscript) writeClass(class string) error {
-	var x = 1600
-	var y = 600
-	rgba := color.RGBA{
-		R: 239,
-		G: 234,
-		B: 58,
-		A: 255,
-	}
-	return d.write(class, rgba, x, y)
+	var x = 2273
+	var y = 900
+	return d.write(class, black, x, y)
 }
 
 func (d *DrawTranscript) write(text string, rgba color.RGBA, x int, y int) error {
+	// todo 要实现字体间距
+	//spacing := 1.5 // 字间距
 	c := freetype.NewContext()
 
 	c.SetDPI(512)

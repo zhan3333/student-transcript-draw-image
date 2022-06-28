@@ -2,15 +2,16 @@ package transcript_test
 
 import (
 	"fmt"
-	"student-scope-send/transcript"
 	"testing"
+
+	"student-scope-send/transcript"
 )
 
 func TestNewDrawTranscript(t *testing.T) {
 	var err error
 	d := transcript.NewDrawTranscript(
-		"../0001.jpg",
-		"../0001-new.jpg",
+		"../0004.jpg",
+		"../testdata/0004-out.jpg",
 		"../fonts/MSYH.TTC",
 		//"../fonts/AR-PL-SungtiL-GB.ttf",
 		transcript.Transcript{
@@ -32,5 +33,30 @@ func TestNewDrawTranscript(t *testing.T) {
 	err = d.Save()
 	if err != nil {
 		fmt.Println(err)
+	}
+}
+
+func TestMakeNewLine(t *testing.T) {
+	tests := []struct {
+		name   string
+		s      string
+		length int
+	}{
+		{
+			name: "s1",
+			s: `思维跳跃如脱兔，绿茵赛场似猛虎。
+沉淀积累多涵养，动静相宜人人夸。`,
+			length: 26,
+		}, {
+			name:   "s2",
+			s:      `你聪明乖巧，非常懂事，对待学习有积极的上进心，希望今后更加专注、踏实，勤字当头。`,
+			length: 26,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s2 := transcript.MakeNewLine(tt.s, tt.length)
+			t.Logf("\n%s", s2)
+		})
 	}
 }

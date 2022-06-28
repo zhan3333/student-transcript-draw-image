@@ -10,7 +10,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/olekukonko/tablewriter"
 	"io"
-	"math/rand"
 	"net/http"
 	"os"
 	"path"
@@ -24,7 +23,7 @@ import (
 	"student-scope-send/util"
 )
 
-var templateFilePath = "./0003.jpg"
+var templateFilePath = "./0004.jpg"
 var fontFilePath = "./fonts/MSYH.TTC"
 
 func Upload(c *gin.Context) {
@@ -219,18 +218,8 @@ func randomFileName(filename string, taskID string) string {
 	return fmt.Sprintf("%s_%s", taskID, filepath.Base(filename))
 }
 
-const randStrs = "abcdefghijklmnopqrstuvwxyz0123456789"
-
 func GenerateTaskID(prefix string) string {
-	rand.Seed(time.Now().Unix())
-	ret := ""
-	if prefix != "" {
-		ret += prefix + "_"
-	}
-	for i := 0; i <= 8; i++ {
-		ret += string(randStrs[rand.Intn(len(randStrs))])
-	}
-	return ret
+	return prefix + "-" + time.Now().Format("2006010215405")
 }
 
 func operator(taskID string) {
