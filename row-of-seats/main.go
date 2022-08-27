@@ -31,10 +31,29 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("读取到了 %d 位同学\n", len(students))
+	students = sortStudents(students)
+	for _, s := range students {
+		fmt.Printf("%s\n", s)
+	}
 	seatArrangement()
 	if err := printSeatsToFile("row-of-seats/座位表.xlsx"); err != nil {
 		fmt.Printf("输出座位表失败: %w\n", err)
 	}
+}
+
+func sortStudents(students []Student) []Student {
+	for i := 0; i < len(students)-1; i++ {
+		max := i
+		for j := i + 1; j < len(students); j++ {
+			if students[j].Scope > students[max].Scope {
+				max = j
+			}
+		}
+		if max != i {
+			students[i], students[max] = students[max], students[i]
+		}
+	}
+	return students
 }
 
 func initStudent(filename string) error {
@@ -382,6 +401,10 @@ type Student struct {
 	// top, mid, bottom
 	Level string
 	Top10 bool
+}
+
+func (s Student) String() string {
+	return fmt.Sprintf("%s-%f", s.Name, s.Scope)
 }
 
 type Seat struct {

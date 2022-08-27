@@ -3,6 +3,7 @@ package transcript
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 //成绩单
@@ -23,6 +24,7 @@ type Transcripts []Transcript
 // 也可以接收 甲乙丙丁 的文本型成绩
 // 允许空成绩
 func IsGradeValid(grade string) bool {
+	grade = strings.TrimSpace(grade)
 	if grade == "" {
 		return true
 	}
@@ -45,6 +47,7 @@ func IsGradeValid(grade string) bool {
 
 // ConvertMainGradeToRating 转换成绩为评级
 func ConvertMainGradeToRating(grade string) string {
+	grade = strings.TrimSpace(grade)
 	if grade == "" {
 		return ""
 	}
@@ -65,6 +68,7 @@ func ConvertMainGradeToRating(grade string) string {
 
 // ConvertSecondaryGradeToRating 次要科目
 func ConvertSecondaryGradeToRating(grade string) string {
+	grade = strings.TrimSpace(grade)
 	if grade == "" {
 		return ""
 	}
