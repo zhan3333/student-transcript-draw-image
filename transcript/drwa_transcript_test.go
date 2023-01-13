@@ -1,38 +1,30 @@
 package transcript_test
 
 import (
-	"fmt"
+	"github.com/stretchr/testify/assert"
+	"student-scope-send/draw"
 	"testing"
 
 	"student-scope-send/transcript"
 )
 
 func TestNewDrawTranscript(t *testing.T) {
-	var err error
-	d := transcript.NewDrawTranscript(
-		"../0004.jpg",
-		"../testdata/0004-out.jpg",
+	drawer := draw.NewDrawer(
+		"../0005.jpg",
 		"../fonts/MSYH.TTC",
 		//"../fonts/AR-PL-SungtiL-GB.ttf",
-		transcript.Transcript{
-			Name:           "陈晞文",
-			Class:          "二一班",
-			Grades:         []string{"甲", "甲", "甲", "甲", "甲", "甲", "甲"},
-			StudentComment: "君不见黄河之水天上来，奔流到海不复回。君不见高堂明镜悲白发，朝如青丝暮成雪。",
-			ParentComment:  "君不见黄河之水天上来，奔流到海不复回。君不见高堂明镜悲白发，朝如青丝暮成雪。",
-			TeacherComment: "君不见黄河之水天上来，奔流到海不复回。君不见高堂明镜悲白发，朝如青丝暮成雪。人生得意须尽欢，莫使金樽空对月。天生我材必有用，千金散尽还复来。烹羊宰牛且为乐，会须一饮三百杯。",
-		})
-	err = d.ReadTemplate()
-	if err != nil {
-		fmt.Println(err)
+	)
+	transcript2 := &transcript.Transcript{
+		Name:           "陈晞文",
+		Class:          "二一班",
+		Grades:         []string{"甲", "甲", "甲", "甲", "甲", "甲", "甲"},
+		StudentComment: "君不见黄河之水天上来，奔流到海不复回。君不见高堂明镜悲白发，朝如青丝暮成雪。",
+		ParentComment:  "你平时性格内向，不善多言，忠厚老实，跟同学能友好相处，平时能关心集体，值日工作负责，喜爱体育活动，不过，你在学习上还要努力些，作业时更要细心，把字写好。",
+		TeacherComment: "君不见黄河之水天上来，奔流到海不复回。君不见高堂明镜悲白发，朝如青丝暮成雪。人生得意须尽欢，莫使金樽空对月。天生我材必有用，千金散尽还复来。烹羊宰牛且为乐，会须一饮三百杯。",
 	}
-	err = d.Draw()
-	if err != nil {
-		fmt.Println(err)
-	}
-	err = d.Save()
-	if err != nil {
-		fmt.Println(err)
+	out := "../testdata/0005-out.jpg"
+	if assert.NoError(t, transcript.Draw(drawer, transcript2, out)) {
+		t.Logf("save to %s", out)
 	}
 }
 
@@ -55,7 +47,7 @@ func TestMakeNewLine(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s2 := transcript.MakeNewLine(tt.s, tt.length)
+			s2 := draw.MakeNewLine(tt.s, tt.length)
 			t.Logf("\n%s", s2)
 		})
 	}

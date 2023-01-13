@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-//成绩单
+// Transcript 成绩单
 type Transcript struct {
 	Name           string
 	Class          string
@@ -28,7 +28,7 @@ func IsGradeValid(grade string) bool {
 	if grade == "" {
 		return true
 	}
-	if isTextGrade(grade) {
+	if isValidTextGrade(grade) {
 		return true
 	}
 	i, err := strconv.ParseFloat(grade, 64)
@@ -51,7 +51,7 @@ func ConvertMainGradeToRating(grade string) string {
 	if grade == "" {
 		return ""
 	}
-	if isTextGrade(grade) {
+	if isValidTextGrade(grade) {
 		return grade
 	}
 	g, _ := strconv.ParseFloat(grade, 64)
@@ -72,7 +72,7 @@ func ConvertSecondaryGradeToRating(grade string) string {
 	if grade == "" {
 		return ""
 	}
-	if isTextGrade(grade) {
+	if isValidTextGrade(grade) {
 		return grade
 	}
 	g, _ := strconv.ParseFloat(grade, 64)
@@ -83,16 +83,22 @@ func ConvertSecondaryGradeToRating(grade string) string {
 	}
 }
 
-var textGrades = map[string]bool{
-	"甲": true,
-	"乙": true,
-	"丙": true,
-	"丁": true,
-	"缺": true,
+var validTextGrades = map[string]bool{
+	"甲":  true,
+	"乙":  true,
+	"丙":  true,
+	"丁":  true,
+	"缺":  true,
+	"甲+": true,
+	"甲-": true,
+	"乙+": true,
+	"乙-": true,
+	"丙+": true,
+	"丙-": true,
 }
 
-func isTextGrade(grade string) bool {
-	if textGrades[grade] {
+func isValidTextGrade(grade string) bool {
+	if validTextGrades[grade] {
 		return true
 	}
 	return false

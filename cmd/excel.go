@@ -60,7 +60,7 @@ const (
 func textTToRate(s string) (Rate, bool) {
 	i, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		return Rate(""), false
+		return "", false
 	}
 	if i >= 80 {
 		return ARate, true

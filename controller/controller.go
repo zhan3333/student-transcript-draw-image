@@ -15,6 +15,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"student-scope-send/draw"
 	"time"
 
 	"student-scope-send/app"
@@ -23,7 +24,7 @@ import (
 	"student-scope-send/util"
 )
 
-var templateFilePath = "./0004.jpg"
+var templateFilePath = "./0005.jpg"
 var fontFilePath = "./fonts/MSYH.TTC"
 
 func Upload(c *gin.Context) {
@@ -244,36 +245,23 @@ func operator(taskID string) {
 		return
 	}
 	fmt.Printf("读取到%d条成绩单数据\n\n\n", len(*ts))
+	drawer := draw.NewDrawer(templateFilePath, fontFilePath)
 	for i, t := range *ts {
 		fmt.Printf("开始处理第 %d 条数据: %s\n", i+1, t.Name)
 		outFile := fmt.Sprintf("%s/%s.jpg", outDir, t.Name)
-		d := transcript.NewDrawTranscript(
-			templateFilePath,
-			outFile,
-			fontFilePath,
-			t,
-		)
+
 		if util.IsFileExists(outFile) {
 			fmt.Printf("成绩单 %s 已经存在, 如需重新生成, 请先删除对应成绩单文件\n", outFile)
-		} else {
-			// 生成成绩单
-			err = d.ReadTemplate()
-			if err != nil {
-				fmt.Printf("读取第 %d 个学生 %s 时读取模板失败: %+v\n", i+1, t.Name, err)
-				continue
-			}
-			err = d.Draw()
-			if err != nil {
-				fmt.Printf("绘制第 %d 个学生 %s 成绩单失败: %+v\n", i+1, t.Name, err)
-				continue
-			}
-			err = d.Save()
-			if err != nil {
-				fmt.Printf("保存第 %d 个学生 %s 成绩单失败: %+v\n", i+1, t.Name, err)
-				continue
-			}
+			continue
 		}
-		task.Mails = append(task.Mails, TaskMail{Name: d.Transcript.Name, FilePath: d.OutFilePath, Email: d.Transcript.Email})
+
+		// 绘制并保存
+		if err = transcript.Draw(drawer, &t, outFile); err != nil {
+			fmt.Printf("绘制第 %d 个学生 %s 时失败: %+v\n", i+1, t.Name, err)
+			continue
+		}
+
+		task.Mails = append(task.Mails, TaskMail{Name: t.Name, FilePath: outFile, Email: t.Email})
 		task.Process = 100 * (i + 1) / len(*ts)
 		_ = task.Cache()
 		fmt.Printf("第 %d 条数据: %s 处理完成\n", i+1, t.Name)
@@ -346,14 +334,12 @@ func send(taskID string) error {
 	return nil
 }
 
-func Zip(src_dir string, zip_file_name string) error {
-	fmt.Println(src_dir, zip_file_name)
-
+func Zip(srcDir string, zipFileName string) error {
 	// 预防：旧文件无法覆盖
-	_ = os.RemoveAll(zip_file_name)
+	_ = os.RemoveAll(zipFileName)
 
 	// 创建：zip文件
-	zipfile, err := os.Create(zip_file_name)
+	zipfile, err := os.Create(zipFileName)
 	if err != nil {
 		return err
 	}
@@ -364,16 +350,16 @@ func Zip(src_dir string, zip_file_name string) error {
 	defer func() { _ = archive.Close() }()
 
 	// 遍历路径信息
-	return filepath.Walk(src_dir, func(path string, info os.FileInfo, _ error) error {
+	return filepath.Walk(srcDir, func(path string, info os.FileInfo, _ error) error {
 
 		// 如果是源路径，提前进行下一个遍历
-		if path == src_dir {
+		if path == srcDir {
 			return nil
 		}
 
 		// 获取：文件头信息
 		header, _ := zip.FileInfoHeader(info)
-		header.Name = strings.TrimPrefix(path, src_dir+`\`)
+		header.Name = strings.TrimPrefix(path, srcDir+`\`)
 
 		// 判断：文件是不是文件夹
 		if info.IsDir() {

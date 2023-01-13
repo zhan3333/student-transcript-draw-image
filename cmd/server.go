@@ -23,9 +23,12 @@ var serverCmd = &cobra.Command{
 		r.GET("api/ping", func(c *gin.Context) {
 			c.String(http.StatusOK, "pong")
 		})
+		// 上传成绩单表格，并异步进行导出
 		r.POST("api/upload", controller.Upload)
+		// 查询导出成绩单结果
 		r.GET("api/query", controller.Query)
-		r.GET("api/send", controller.Send)
+		// 发送成绩单邮件
+		r.POST("api/send", controller.Send)
 		r.Static("api/export", "files/export")
 		if err := r.Run(fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))); err != nil {
 			return fmt.Errorf("run server: %w", err)

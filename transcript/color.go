@@ -2,16 +2,16 @@ package transcript
 
 import "image/color"
 
-//金色
-var golden = color.RGBA{
+// Golden 金色
+var Golden = color.RGBA{
 	R: 239,
 	G: 234,
 	B: 58,
 	A: 255,
 }
 
-//黑色
-var black = color.RGBA{
+// Black 黑色
+var Black = color.RGBA{
 	R: 0,
 	G: 0,
 	B: 0,
