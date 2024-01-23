@@ -38,7 +38,7 @@ func Draw(drawer *draw.Drawer, transcript *Transcript, outputFilePath string) er
 	}
 
 	// 童言
-	err = drawer.Write(draw.MakeNewLine(transcript.StudentComment, 9), Black, studentCommentCoordinate.X, studentCommentCoordinate.Y)
+	err = drawer.Write(draw.MakeNewLine(transcript.StudentComment, 11), Black, studentCommentCoordinate.X, studentCommentCoordinate.Y)
 	if err != nil {
 		return err
 	}

@@ -10,7 +10,7 @@ import (
 
 func TestNewDrawTranscript(t *testing.T) {
 	drawer := draw.NewDrawer(
-		"../0005.jpg",
+		"../0006.png",
 		"../fonts/MSYH.TTC",
 		//"../fonts/AR-PL-SungtiL-GB.ttf",
 	)
@@ -22,7 +22,7 @@ func TestNewDrawTranscript(t *testing.T) {
 		ParentComment:  "你平时性格内向，不善多言，忠厚老实，跟同学能友好相处，平时能关心集体，值日工作负责，喜爱体育活动，不过，你在学习上还要努力些，作业时更要细心，把字写好。",
 		TeacherComment: "君不见黄河之水天上来，奔流到海不复回。君不见高堂明镜悲白发，朝如青丝暮成雪。人生得意须尽欢，莫使金樽空对月。天生我材必有用，千金散尽还复来。烹羊宰牛且为乐，会须一饮三百杯。",
 	}
-	out := "../testdata/0005-out.jpg"
+	out := "../testdata/0006-out.png"
 	if assert.NoError(t, transcript.Draw(drawer, transcript2, out)) {
 		t.Logf("save to %s", out)
 	}

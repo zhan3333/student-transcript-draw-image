@@ -13,6 +13,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"student-scope-send/constant"
 )
 
 // Drawer 绘制成绩单
@@ -30,8 +31,8 @@ func NewDrawer(templateFileName string, fontFilePath string) *Drawer {
 	return &Drawer{
 		TemplateFileName: templateFileName,
 		FontFilePath:     fontFilePath,
-		FontSize:         9,
-		SpaceHeight:      88,
+		FontSize:         constant.FontSize,
+		SpaceHeight:      constant.SpaceHeight,
 	}
 }
 
