@@ -37,6 +37,11 @@ func Read(path string) (*transcript.Transcripts, error) {
 			transcript.ConvertSecondaryGradeToRating(row[7]), //艺术
 			transcript.ConvertSecondaryGradeToRating(row[8]), //综合
 		}
+		for k, v := range grades {
+			if v == "" {
+				grades[k] = "无"
+			}
+		}
 		email := ""
 		if len(row) > 12 {
 			email = row[12]

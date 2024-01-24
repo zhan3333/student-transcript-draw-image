@@ -15,6 +15,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"student-scope-send/constant"
 	"student-scope-send/draw"
 	"time"
 
@@ -23,9 +24,6 @@ import (
 	"student-scope-send/transcript"
 	"student-scope-send/util"
 )
-
-var templateFilePath = "./0005.jpg"
-var fontFilePath = "./fonts/MSYH.TTC"
 
 func Upload(c *gin.Context) {
 	// 单文件
@@ -245,7 +243,7 @@ func operator(taskID string) {
 		return
 	}
 	fmt.Printf("读取到%d条成绩单数据\n\n\n", len(*ts))
-	drawer := draw.NewDrawer(templateFilePath, fontFilePath)
+	drawer := draw.NewDrawer(constant.TemplateFilePath, constant.FontFilePath)
 	for i, t := range *ts {
 		fmt.Printf("开始处理第 %d 条数据: %s\n", i+1, t.Name)
 		outFile := fmt.Sprintf("%s/%s.jpg", outDir, t.Name)

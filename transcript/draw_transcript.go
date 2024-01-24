@@ -2,6 +2,7 @@ package transcript
 
 import (
 	"fmt"
+	"student-scope-send/constant"
 	"student-scope-send/draw"
 )
 
@@ -38,19 +39,19 @@ func Draw(drawer *draw.Drawer, transcript *Transcript, outputFilePath string) er
 	}
 
 	// 童言
-	err = drawer.Write(draw.MakeNewLine(transcript.StudentComment, 11), Black, studentCommentCoordinate.X, studentCommentCoordinate.Y)
+	err = drawer.Write(draw.MakeNewLine(transcript.StudentComment, constant.StudentCommentLineLen), Black, studentCommentCoordinate.X, studentCommentCoordinate.Y)
 	if err != nil {
 		return err
 	}
 
 	// 家长
-	err = drawer.Write(draw.MakeNewLine(transcript.ParentComment, 11), Black, parentCommentCoordinate.X, parentCommentCoordinate.Y)
+	err = drawer.Write(draw.MakeNewLine(transcript.ParentComment, constant.ParentCommentLineLen), Black, parentCommentCoordinate.X, parentCommentCoordinate.Y)
 	if err != nil {
 		return err
 	}
 
 	// 教师
-	err = drawer.Write(draw.MakeNewLine(transcript.TeacherComment, 26), Black, teacherCommentCoordinate.X, teacherCommentCoordinate.Y)
+	err = drawer.Write(draw.MakeNewLine(transcript.TeacherComment, constant.TeacherCommentLineLen), Black, teacherCommentCoordinate.X, teacherCommentCoordinate.Y)
 	if err != nil {
 		return err
 	}
