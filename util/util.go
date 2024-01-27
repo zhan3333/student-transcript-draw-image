@@ -1,6 +1,11 @@
 package util
 
-import "os"
+import (
+	"os"
+	"regexp"
+)
+
+var emailRegexp = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
 func IsFileExists(path string) bool {
 	_, err := os.Stat(path) //os.Stat获取文件信息
@@ -11,4 +16,8 @@ func IsFileExists(path string) bool {
 		return false
 	}
 	return true
+}
+
+func IsEmail(s string) bool {
+	return emailRegexp.MatchString(s)
 }
